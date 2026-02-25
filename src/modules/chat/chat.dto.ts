@@ -23,3 +23,20 @@ export class ConversationDto {
   @IsNumber({ allowNaN: false }, { message: 'Invalid user id' })
   userId: number;
 }
+
+export class GetConversationQueryDto {
+  @IsNotEmpty({ message: 'User id is required' })
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false }, { message: 'Invalid user id' })
+  userId: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false }, { message: 'Invalid page number' })
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false }, { message: 'Invalid limit number' })
+  limit?: number;
+}

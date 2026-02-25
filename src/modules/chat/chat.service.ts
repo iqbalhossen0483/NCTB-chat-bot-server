@@ -134,4 +134,43 @@ export class ChatService {
       })();
     });
   }
+
+  async getUserConversation(userId: number, page = 1, limit = 10) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const skip = (page - 1) * limit;
+    const conversations = await this.conversationRepository.find({
+      where: { user: { id: userId } },
+      relations: { user: true, messages: true },
+      select: {
+        user: {
+          email: true,
+          name: true,
+        },
+      },
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    const total = await this.conversationRepository.count({
+      where: { user },
+    });
+
+    return {
+      success: true,
+      message: 'Conversations fetched successfully',
+      data: conversations,
+      meta: {
+        total,
+        currentPage: page,
+        perPage: limit,
+        totalPage: Math.ceil(total / limit),
+      },
+    };
+  }
 }
