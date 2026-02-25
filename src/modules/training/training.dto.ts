@@ -11,7 +11,4 @@ export class UploadBookDto {
 
   @IsOptional()
   writer: string;
-
-  @IsNotEmpty({ message: 'Pages is required' })
-  pages: number;
 }
