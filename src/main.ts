@@ -2,12 +2,14 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import { setDefaultResultOrder } from 'dns';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionFilter } from './middleware/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  setDefaultResultOrder('ipv4first');
   const configService = app.get(ConfigService);
   const isProd = configService.get('NODE_ENV') === 'production';
   const apiPrefix = configService.get<string>('API_PREFIX') ?? '/api';

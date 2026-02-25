@@ -1,6 +1,6 @@
 type CHUNK = {
   book_name: string;
-  page_start: number;
-  page_end: number;
+  pageStart: number;
+  pageEnd: number;
   content: string;
 };

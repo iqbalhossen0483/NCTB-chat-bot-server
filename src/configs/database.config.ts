@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BookEntity } from 'src/entities/Book.entity';
+import { ChunkEntity } from 'src/entities/Chunk.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { BookEntity } from 'src/entities/Book.entity';
         password: configService.get<string>('DB_PASS', 'postgres'),
         database: configService.get<string>('DB_NAME', 'blog_server'),
         synchronize: true,
-        entities: [BookEntity],
+        entities: [BookEntity, ChunkEntity],
       }),
     }),
   ],

@@ -3,8 +3,10 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ChunkEntity } from './Chunk.entity';
 
 export enum ClassName {
   One = '1',
@@ -43,6 +45,9 @@ export class BookEntity {
 
   @Column()
   fileSize: string;
+
+  @OneToMany(() => ChunkEntity, (chunk) => chunk.book)
+  chunks: ChunkEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

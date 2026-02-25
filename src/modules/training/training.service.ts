@@ -43,8 +43,8 @@ export class TrainingService {
         if (bufferTokens.length >= CHUNK_SIZE) {
           chunks.push({
             book_name: bookName,
-            page_start: pageStart,
-            page_end: pageEnd,
+            pageStart: pageStart,
+            pageEnd: pageEnd,
             content: decode(bufferTokens),
           });
 
@@ -59,8 +59,8 @@ export class TrainingService {
     if (bufferTokens.length > 0) {
       chunks.push({
         book_name: bookName,
-        page_start: pageStart,
-        page_end: pageEnd,
+        pageStart: pageStart,
+        pageEnd: pageEnd,
         content: decode(bufferTokens),
       });
     }
