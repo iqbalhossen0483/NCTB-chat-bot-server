@@ -1,15 +1,22 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { RedisModule } from 'src/modules/redis/redis.module';
-import { RedisService } from 'src/modules/redis/redis.service';
+import { ConfigService } from '@nestjs/config';
+
+export enum QueueName {
+  Training = 'training',
+}
 
 @Module({
   imports: [
     BullModule.forRootAsync({
-      imports: [RedisModule],
-      inject: [RedisService],
-      useFactory: (redisService: RedisService) => ({
-        connection: redisService.getClient(),
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+          password: configService.get<string>('REDIS_PASSWORD'),
+          db: configService.get<number>('REDIS_DB', 0),
+        },
       }),
     }),
   ],

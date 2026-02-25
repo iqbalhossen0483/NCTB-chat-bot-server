@@ -38,12 +38,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Redis disconnected');
   }
 
-  // get raw client
-  getClient(): Redis {
-    return this.client;
-  }
-
-  // ─── String Operations ────────────────────────────────────────────────────
   async get(key: string): Promise<string | null> {
     return this.client.get(key);
   }
