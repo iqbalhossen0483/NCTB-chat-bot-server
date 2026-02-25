@@ -1,13 +1,18 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { QueueName } from 'src/configs/queue.config.module';
+import { BookEntity } from 'src/entities/Book.entity';
 import { PdfService } from './pdf.service';
 import { TrainingController } from './training.controller';
 import { TrainingProcessor } from './training.processor';
 import { TrainingService } from './training.service';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: QueueName.Training })],
+  imports: [
+    BullModule.registerQueue({ name: QueueName.Training }),
+    TypeOrmModule.forFeature([BookEntity]),
+  ],
   controllers: [TrainingController],
   providers: [TrainingService, TrainingProcessor, PdfService],
 })
