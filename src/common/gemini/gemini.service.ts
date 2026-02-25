@@ -1,52 +1,41 @@
 import {
+  Content,
   ContentEmbedding,
-  ContentListUnion,
-  GenerateContentConfig,
-  GoogleGenAI,
-} from '@google/genai';
+  EmbedContentResponse,
+  GoogleGenerativeAI,
+} from '@google/generative-ai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GeminiService {
-  ai: GoogleGenAI;
-  config: GenerateContentConfig;
+  ai: GoogleGenerativeAI;
   model: string = 'gemini-flash-latest';
   embeddingModel: string = 'gemini-embedding-001';
 
   constructor(private readonly configService: ConfigService) {
-    this.ai = new GoogleGenAI({
-      apiKey: configService.get<string>('GEMINI_API_KEY', 'api_key'),
-    });
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
+    this.ai = new GoogleGenerativeAI(apiKey);
   }
 
-  async askGemini(question: string) {
-    const contents: ContentListUnion = {
-      role: 'user',
-      text: question,
-    };
-
-    const response = await this.ai.models.generateContent({
-      config: this.config,
+  async askGemini(question: string, history: Content[] = []) {
+    const model = this.ai.getGenerativeModel({
       model: this.model,
-      contents,
     });
 
-    return response;
+    const contents: Content[] = history;
+    contents.push({ role: 'user', parts: [{ text: question }] });
+
+    return await model.generateContentStream({ contents });
   }
 
-  async embedding(text: string): Promise<ContentEmbedding[]> {
-    const response = await this.ai.models.embedContent({
+  async embedding(text: string): Promise<ContentEmbedding> {
+    const model = this.ai.getGenerativeModel({
       model: this.embeddingModel,
-      contents: {
-        parts: [
-          {
-            text,
-          },
-        ],
-      },
     });
-    if (!response.embeddings) throw new Error('Embeddings not found');
-    return response.embeddings;
+    const response: EmbedContentResponse = await model.embedContent(text);
+    if (!response.embedding) throw new Error('Embeddings not found');
+    return response.embedding;
   }
 }

@@ -4,3 +4,8 @@ type CHUNK = {
   pageEnd: number;
   content: string;
 };
+
+type MESSAGE_HISTORY = {
+  role: 'user' | 'assistant';
+  content: string;
+};
