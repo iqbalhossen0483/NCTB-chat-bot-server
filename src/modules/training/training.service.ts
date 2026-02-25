@@ -117,7 +117,6 @@ export class TrainingService {
       message: 'Book uploaded successfully',
       data: book,
       chunks: chunks.length,
-      pages,
     };
   }
 
