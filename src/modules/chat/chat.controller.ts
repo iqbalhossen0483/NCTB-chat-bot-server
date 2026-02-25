@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Sse } from '@nestjs/common';
 import { ConversationDto } from './chat.dto';
 import { ChatService } from './chat.service';
 
@@ -6,7 +6,7 @@ import { ChatService } from './chat.service';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
-  @Post()
+  @Sse()
   async conversation(@Body() payload: ConversationDto) {
     return this.chatService.conversation(payload);
   }
