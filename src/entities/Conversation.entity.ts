@@ -1,4 +1,5 @@
 import {
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -13,10 +14,13 @@ export class ConversationEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => UserEntity, (user) => user.conversation)
+  @ManyToOne(() => UserEntity, (user) => user.conversations)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ManyToOne(() => MessageEntity, (message) => message.conversation)
-  message: MessageEntity;
+  @OneToMany(() => MessageEntity, (message) => message.conversation)
+  messages: MessageEntity[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

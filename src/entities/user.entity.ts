@@ -3,7 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,8 +23,8 @@ export class UserEntity {
   @Column()
   password: string;
 
-  @ManyToOne(() => ConversationEntity, (conversation) => conversation.user)
-  conversation: ConversationEntity[];
+  @OneToMany(() => ConversationEntity, (conversation) => conversation.user)
+  conversations: ConversationEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

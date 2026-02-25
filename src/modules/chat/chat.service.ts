@@ -1,9 +1,12 @@
+import { Content } from '@google/generative-ai';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observable } from 'rxjs';
 import { GeminiService } from 'src/common/gemini/gemini.service';
 import { ChunkEntity, ChunkStatus } from 'src/entities/Chunk.entity';
 import { ConversationEntity } from 'src/entities/Conversation.entity';
+import { MessageEntity, MessageRole } from 'src/entities/Message.entity';
+import { UserEntity } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConversationDto } from './chat.dto';
 
@@ -15,12 +18,16 @@ export class ChatService {
     @InjectRepository(ConversationEntity)
     private conversationRepository: Repository<ConversationEntity>,
     private readonly geminiService: GeminiService,
+    @InjectRepository(MessageEntity)
+    private messageRepository: Repository<MessageEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   async retriveConversation(id: number) {
     const conversation = await this.conversationRepository.findOne({
       where: { id },
-      relations: { user: true, message: true },
+      relations: { user: true, messages: true },
       select: {
         user: {
           email: true,
@@ -36,12 +43,43 @@ export class ChatService {
     return conversation;
   }
 
+  async saveMessage(
+    conversation: ConversationEntity,
+    message: string,
+    role: MessageRole,
+  ) {
+    const messageInstance = this.messageRepository.create({
+      message,
+      role,
+      conversation,
+    });
+
+    await this.messageRepository.save(messageInstance);
+  }
+
   async conversation(payload: ConversationDto) {
-    const { conversationId, message } = payload;
-    let conversation: ConversationEntity | null = null;
+    const { conversationId, message, userId } = payload;
+    let conversation: ConversationEntity;
+    let history: Content[] = [];
+
     if (conversationId) {
       conversation = await this.retriveConversation(conversationId);
-      console.log(conversation);
+      history = conversation.messages.map((message) => ({
+        role: message.role,
+        parts: [{ text: message.message }],
+      }));
+    } else {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const conversationInstance = this.conversationRepository.create({
+        user,
+      });
+      await this.conversationRepository.save(conversationInstance);
+      conversation = conversationInstance;
     }
     const embadedQuestion = await this.geminiService.embedding(message);
 
@@ -65,6 +103,7 @@ export class ChatService {
     const streamingResp = await this.geminiService.askGemini(
       message,
       contextText,
+      history,
     );
 
     return new Observable<MessageEvent>((subscriber) => {
@@ -79,8 +118,13 @@ export class ChatService {
             subscriber.next({ data: { text, done: false } } as MessageEvent);
           }
 
-          // await this.persistConversation(conversationId, message, fullResponse);
-          console.log(fullResponse);
+          // save user and assistant message
+          await this.saveMessage(conversation, message, MessageRole.User);
+          await this.saveMessage(
+            conversation,
+            fullResponse,
+            MessageRole.Assistant,
+          );
 
           subscriber.next({ data: { text: '', done: true } } as MessageEvent);
           subscriber.complete();

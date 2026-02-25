@@ -17,4 +17,9 @@ export class ConversationDto {
   @IsString({ message: 'Message must be a string' })
   @Length(10, 300, { message: 'Message must be between 10 and 300 characters' })
   message: string;
+
+  @IsNotEmpty({ message: 'User id is required' })
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false }, { message: 'Invalid user id' })
+  userId: number;
 }

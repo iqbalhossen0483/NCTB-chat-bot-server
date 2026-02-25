@@ -1,21 +1,22 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ConversationEntity } from './Conversation.entity';
+
+export enum MessageRole {
+  User = 'user',
+  Assistant = 'assistant',
+}
 
 @Entity('messages')
 export class MessageEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => ConversationEntity, (conversation) => conversation.message)
-  @JoinColumn({ name: 'conversation_id' })
+  @ManyToOne(() => ConversationEntity, (conversation) => conversation.messages)
   conversation: ConversationEntity;
 
   @Column()
   message: string;
+
+  @Column({ type: 'enum', enum: MessageRole })
+  role: MessageRole;
 }
