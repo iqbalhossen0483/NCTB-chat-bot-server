@@ -68,6 +68,12 @@ export class TrainingService {
     return chunks;
   }
 
+  async processToQueue(chunks: CHUNK[]) {
+    for (const chunk of chunks) {
+      await this.trainingQueue.add(QueueName.Training, chunk);
+    }
+  }
+
   async uploadBook(payload: UploadBookDto, file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('File is required');
@@ -94,6 +100,8 @@ export class TrainingService {
     await this.bookRepository.save(book);
 
     const chunks = this.chunkBook(pages, payload.bookName);
+
+    await this.processToQueue(chunks);
 
     return {
       success: true,
