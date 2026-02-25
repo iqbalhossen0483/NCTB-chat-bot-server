@@ -3,7 +3,7 @@ import { ConversationEntity } from './Conversation.entity';
 
 export enum MessageRole {
   User = 'user',
-  Assistant = 'assistant',
+  Assistant = 'model',
 }
 
 @Entity('messages')

@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class GeminiService {
   ai: GoogleGenerativeAI;
-  model: string = 'gemini-flash-latest';
+  model: string = 'gemini-2.5-flash';
   embeddingModel: string = 'gemini-embedding-001';
 
   constructor(private readonly configService: ConfigService) {
@@ -27,6 +27,7 @@ export class GeminiService {
       - If the answer cannot be found in the context, clearly state: "I don't have enough information in the provided context to answer this question."
       - Do not make assumptions or include external knowledge beyond what is given
       - Keep your response concise, clear, and directly relevant to the question
+      - At the end of your response, include source of book name, page number and chapter name (if applicable)
 
       Context:
       ${contex}`;
@@ -39,6 +40,7 @@ export class GeminiService {
     const contents: Content[] = history;
     contents.push({ role: 'user', parts: [{ text: question }] });
 
+    console.log('gerenating...');
     return await model.generateContentStream({ contents });
   }
 

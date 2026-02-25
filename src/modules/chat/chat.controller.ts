@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Query, Sse } from '@nestjs/common';
+import { Controller, Get, Query, Sse } from '@nestjs/common';
 import { ConversationDto, GetConversationQueryDto } from './chat.dto';
 import { ChatService } from './chat.service';
 
@@ -7,8 +7,8 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Sse()
-  async conversation(@Body() payload: ConversationDto) {
-    return this.chatService.conversation(payload);
+  async conversation(@Query() query: ConversationDto) {
+    return this.chatService.conversation(query);
   }
 
   @Get('/conversations')

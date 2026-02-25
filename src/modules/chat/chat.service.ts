@@ -81,24 +81,34 @@ export class ChatService {
       await this.conversationRepository.save(conversationInstance);
       conversation = conversationInstance;
     }
+    console.log('start embedding...');
     const embadedQuestion = await this.geminiService.embedding(message);
-
+    console.log('end embedding.;..');
     // search on pgvector with this embedding
     const vectorLiteral = `[${embadedQuestion.values.join(',')}]`;
 
+    console.log('data retriving...');
     const chunks = await this.chunkRepository
       .createQueryBuilder('chunk')
+      .leftJoinAndSelect('chunk.book', 'book')
       .where('chunk.status = :status', { status: ChunkStatus.Completed })
       .orderBy(`chunk.embedding <-> '${vectorLiteral}'::vector`, 'ASC')
-      .limit(10)
+      .limit(4)
       .getMany();
+
+    console.log('data retrived');
 
     if (!chunks.length) {
       throw new NotFoundException('No context found');
     }
 
-    const context = chunks.map((chunk) => chunk.content);
+    const context = chunks.map(
+      (chunk) =>
+        `Book Name: ${chunk.book.bookName}\n pageStart:${chunk.pageStart} pageEnd:${chunk.pageEnd}  content:${chunk.content} \n\n\n`,
+    );
     const contextText = context.join(' ');
+
+    console.log('generating answer');
 
     const streamingResp = await this.geminiService.askGemini(
       message,
@@ -106,10 +116,18 @@ export class ChatService {
       history,
     );
 
+    console.log('answer generated');
+
     return new Observable<MessageEvent>((subscriber) => {
       void (async () => {
         try {
           let fullResponse = '';
+
+          if (!payload.conversationId) {
+            subscriber.next({
+              data: { conversationId: conversation.id, done: false },
+            } as MessageEvent);
+          }
 
           for await (const chunk of streamingResp.stream) {
             const text = chunk.text();
