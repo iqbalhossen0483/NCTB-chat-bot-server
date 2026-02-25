@@ -3,9 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { setDefaultResultOrder } from 'dns';
+import express from 'express';
 import helmet from 'helmet';
+import serverless from 'serverless-http';
 import { AppModule } from './app.module';
 import { AllExceptionFilter } from './middleware/exception.filter';
+
+const expressApp = express();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -49,3 +53,5 @@ async function bootstrap() {
   });
 }
 bootstrap().catch((err) => console.log(err));
+
+export const handler = serverless(expressApp);
