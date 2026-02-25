@@ -11,7 +11,7 @@ export const multerConfig: MulterOptions = {
     },
   }),
   fileFilter: (req, file, callback) => {
-    if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+    if (file.mimetype.match(/\/(pdf)$/)) {
       callback(null, true);
     } else {
       callback(new Error('Invalid file type'), false);
