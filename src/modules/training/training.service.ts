@@ -28,9 +28,12 @@ export class TrainingService {
     const OVERLAP = 100;
     let currentPage = 0;
 
+    console.log('page found: ', pages.length);
+
     for (const page of pages) {
       const tokens = encode(page);
       currentPage++;
+      console.log('current page: ', currentPage);
 
       for (let i = 0; i < tokens.length; i++) {
         if (bufferTokens.length === 0) {
@@ -70,7 +73,8 @@ export class TrainingService {
 
   async processToQueue(chunks: CHUNK[]) {
     for (const chunk of chunks) {
-      await this.trainingQueue.add(QueueName.Training, chunk);
+      const job = await this.trainingQueue.add(QueueName.Training, chunk);
+      console.log('job added: ', job.id);
     }
   }
 
@@ -86,13 +90,18 @@ export class TrainingService {
       throw new ConflictException('Book already exists');
     }
 
-    const result = await this.cloudinaryService.uploadFile(file, {
-      folder: 'books',
-    });
-
     const book = this.bookRepository.create(payload);
-    book.fileUrl = result.url as string;
     book.fileSize = file.size / 1024 / 1024 + ' MB';
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size <= MAX_FILE_SIZE) {
+      const result = await this.cloudinaryService.uploadFile(file, {
+        folder: 'books',
+      });
+      book.fileUrl = result.url as string;
+    } else {
+      book.fileUrl = '';
+    }
 
     const pages = await this.pdfService.extractTextPageByPage(file.buffer);
     book.pages = pages.length;
@@ -107,6 +116,17 @@ export class TrainingService {
       success: true,
       message: 'Book uploaded successfully',
       data: book,
+      chunks: chunks.length,
+      pages,
+    };
+  }
+
+  async getQueueCounts() {
+    const counts = await this.trainingQueue.getJobCounts();
+    return {
+      success: true,
+      message: 'Queue counts fetched successfully',
+      data: counts,
     };
   }
 }

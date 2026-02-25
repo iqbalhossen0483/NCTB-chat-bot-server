@@ -54,6 +54,7 @@ export class TrainingProcessor extends WorkerHost {
     let chunkId: number | null = null;
     try {
       const chunk = job.data as CHUNK;
+      console.log('Processing chunk', job.id);
       const storedChunk = await this.storeOnDB(chunk);
       chunkId = storedChunk.id;
       const embedded = await this.geminiService.embedding(chunk.content);

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -21,5 +22,10 @@ export class TrainingController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.trainingService.uploadBook(payload, file);
+  }
+
+  @Get('queue-counts')
+  async getQueueCounts() {
+    return this.trainingService.getQueueCounts();
   }
 }
