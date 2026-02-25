@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   UploadedFile,
@@ -27,5 +28,10 @@ export class TrainingController {
   @Get('queue-counts')
   async getQueueCounts() {
     return this.trainingService.getQueueCounts();
+  }
+
+  @Delete('clear-all-jobs')
+  async clearAllJobs() {
+    return this.trainingService.clearAllJobs();
   }
 }

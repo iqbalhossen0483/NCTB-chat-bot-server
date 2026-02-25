@@ -128,4 +128,16 @@ export class TrainingService {
       data: counts,
     };
   }
+
+  async clearAllJobs() {
+    await this.trainingQueue.drain(true);
+    await this.trainingQueue.clean(0, 0, 'failed');
+    await this.trainingQueue.clean(0, 0, 'completed');
+    console.log('Queue cleared');
+
+    return {
+      success: true,
+      message: 'Queue cleared successfully',
+    };
+  }
 }
