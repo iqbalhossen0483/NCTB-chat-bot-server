@@ -22,17 +22,25 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       password: this.configService.get<string>('REDIS_PASSWORD'),
       db: this.configService.get<number>('REDIS_DB', 0),
       retryStrategy: (times) => Math.min(times * 100, 3000), // retry with backoff
+      maxRetriesPerRequest: null,
     };
 
     this.client = new Redis(options);
 
-    this.client.on('connect', () => this.logger.log('Redis connected'));
+    this.client.on('connect', () => {
+      this.logger.log('Redis connected');
+    });
     this.client.on('error', (err) => this.logger.error('Redis error', err));
   }
 
   async onModuleDestroy() {
     await this.client.quit();
     this.logger.log('Redis disconnected');
+  }
+
+  // get raw client
+  getClient(): Redis {
+    return this.client;
   }
 
   // ─── String Operations ────────────────────────────────────────────────────
