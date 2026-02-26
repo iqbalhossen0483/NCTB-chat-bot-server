@@ -7,6 +7,8 @@ on:
       - 'v*.*.*'
 
 env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
   REGISTRY_IMAGE: iqbalhossen60483/nctb-chat-bot
 
 jobs:
