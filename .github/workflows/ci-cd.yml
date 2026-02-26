@@ -1,4 +1,4 @@
-name: NCTB Chat Bot Server CI/CD Pipeline
+name: NCTB Chat Bot Agent Server CI/CD Pipeline
 
 on:
   push:
