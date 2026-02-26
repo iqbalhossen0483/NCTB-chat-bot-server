@@ -29,7 +29,10 @@ export class PdfService {
         const text = content.items
           .map((item: any) => ('str' in item ? item.str : ''))
           .join(' ')
+          // eslint-disable-next-line no-control-regex
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
           .replace(/\s+/g, ' ')
+          .normalize('NFC')
           .trim();
 
         pageTexts.push(text);
